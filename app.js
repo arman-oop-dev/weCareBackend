@@ -13,7 +13,7 @@ const app = express();
 // CORS configuration
 app.use(
   cors({
-    origin: "https://wecare-nine-henna.vercel.app",
+    origin: process.env.BETTER_AUTH_URL || "http://localhost:3000",
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
