@@ -1,11 +1,29 @@
-export const verifyAPI = async (req, res, next) => {
-  const authHeader = req.headers.authentication;
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
-  if (!authHeader) {
-    return res.status(400).json({
-      message: "Unauthorized",
-    });
+// Create once, not per request, so the keys are cached
+const JWKS = createRemoteJWKSet(new URL("http://localhost:3000/api/auth/jwks"));
+
+const authVerify = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({ status: "error", message: "Access denied" });
   }
 
-  next();
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: "http://localhost:3000",
+      audience: "http://localhost:3000",
+    });
+
+    req.user = { id: payload.id ?? payload.sub, ...payload };
+    next();
+  } catch (error) {
+    console.error("Token validation failed:", error);
+    return res.status(401).json({ status: "error", message: "Invalid token" });
+  }
 };
+
+export default authVerify;

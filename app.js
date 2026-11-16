@@ -7,12 +7,20 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import mongoose from "mongoose";
 import router from "./app/routers/api.js";
-import bodyParser from "body-parser";
 
 const app = express();
 
+// CORS configuration
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
 // Security features
-app.use(cors());
 app.use(helmet());
 
 // Body parser
@@ -42,6 +50,7 @@ app.use(limiter);
 app.set("etag", process.env.WEB_CATCH || "weak");
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
+
 // MongoDB connection
 mongoose
   .connect(process.env.DB_URL, { autoIndex: true })
@@ -52,6 +61,12 @@ mongoose
     console.error("Database connection failed:", error.message);
     process.exit(1);
   });
+
+// Request logger (development)
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 // Routes
 app.use("/api", router);

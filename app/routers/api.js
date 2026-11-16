@@ -2,37 +2,46 @@ import express from "express";
 
 import * as Events from "../controllers/eventsController.js";
 import * as joinEvent from "../controllers/joinedEventsControllers.js";
+import * as Subscription from "../controllers/SubscriptionController.js";
+import authVerify from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// POST /events - Create event (store the creator’s email) - JWT
-router.post("/events", Events.createEvents);
-
-// GET /events/:id Event details page - public
+// Get all events -done
 router.get("/events", Events.getEvents);
 
-// GET /api/events/:id – Get individual event details. - public
+// Get event details-done
 router.get("/events/:id", Events.getEventDetails);
 
-//  GET /events/user/:userID - Manage Events: events created by the logged-in user - JWT
-router.get("/events/user/:creatorID", Events.getEventsByUser);
+// =================================
+// PROTECTED ROUTES (JWT REQUIRED)
+// =================================
 
-//  PATCH /events/:id	Update event (owner only)	JWT
-router.patch("/events/:id", Events.updateEventDetails);
+// Get events created by logged-in user
+router.get("/events/user/:creatorID", authVerify, Events.getEventsByUser);
 
-// DELETE /api/events/:id – Delete an event owned by the user.
-router.delete("/events/:id", Events.deleteEvent);
+// Create event - done
+router.post("/events", authVerify, Events.createEvents);
 
-// POST /events/:id/join	Join event (block duplicate joins)	JWT
-router.post("/eventId", joinEvent.joinEvent);
+// Delete event (owner only)
+router.delete("/events/:id", authVerify, Events.deleteEvent);
 
-// All users who joined an event /events/:eventId/participants
-router.get("/events/participants/:eventId", joinEvent.getEventParticipants);
+// Update event (owner only)
+router.patch("/events/:id", authVerify, Events.updateEventDetails);
 
-// All events joined by a user -users/:userId/joined-events
-router.get("/events/participantuser/:userID", joinEvent.getUserJoinedEvents);
+// Join event
+router.post("/events/join/:eventId", authVerify, joinEvent.joinEvent);
 
-// Leave an event - /events/participantuser/:id
-router.delete("/events/participantuser/:id", joinEvent.leaveEvent);
+// Get events joined by logged-in user
+router.get(
+  "/events/participations/:joinUserID",
+  authVerify,
+  joinEvent.getUserJoinedEvents,
+);
 
+// Leave Joint event
+router.delete("/events/participantuser/:id", authVerify, joinEvent.leaveEvent);
+
+// subscription
+router.post("/subscription", Subscription.subscriber);
 export default router;
