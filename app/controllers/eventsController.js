@@ -95,7 +95,10 @@ export const getEventsByUser = async (req, res) => {
     const { creatorID } = req.params;
 
     if (creatorID !== req.user.id) {
-      return res.status(403).json({ status: "error", message: "Forbidden" });
+      return res.status(403).json({
+        status: "error",
+        message: "Forbidden",
+      });
     }
 
     const data = await EventModel.find({ creatorID }).sort({ createdAt: -1 });
