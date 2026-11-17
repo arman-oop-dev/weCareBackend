@@ -1,8 +1,29 @@
 import mongoose from "mongoose";
 import EventModel from "../models/eventsModel.js";
 
-// POST /events - Create event (store the creator’s email) - JWT
+// GET /events/ Event details page - public - done
+export const getEvents = async (req, res) => {
+  try {
+    const data = await EventModel.find(
+      {},
+      { updatedAt: 0, createdAt: 0 },
+    ).lean();
 
+    return res.status(200).json({
+      status: "Success",
+      message: data.length === 0 ? "There is no data to show." : undefined,
+      data, // always an array, empty if nothing found
+    });
+  } catch (error) {
+    console.error("getEvents error:", error);
+    return res.status(500).json({
+      status: "Fail",
+      message: "Something went wrong, try again",
+    });
+  }
+};
+
+// POST /events - Create event (store the creator’s email) - JWT
 export const createEvents = async (req, res) => {
   try {
     const {
@@ -38,25 +59,6 @@ export const createEvents = async (req, res) => {
     return res.status(500).json({
       status: "Fail",
       message: err.message,
-    });
-  }
-};
-
-// GET /events/ Event details page - public - done
-export const getEvents = async (req, res) => {
-  try {
-    const data = await EventModel.find({}, { updatedAt: 0, createdAt: 0 }).lean();
-
-    return res.status(200).json({
-      status: "Success",
-      message: data.length === 0 ? "There is no data to show." : undefined,
-      data, // always an array, empty if nothing found
-    });
-  } catch (error) {
-    console.error("getEvents error:", error);
-    return res.status(500).json({
-      status: "Fail",
-      message: "Something went wrong, try again",
     });
   }
 };
