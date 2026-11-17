@@ -14,8 +14,8 @@ const authVerify = async (req, res, next) => {
 
   try {
     const { payload } = await jwtVerify(token, JWKS, {
-      issuer: "http://localhost:3000",
-      audience: "http://localhost:3000",
+      issuer: process.env.BETTER_AUTH_URL,
+      audience: process.env.BETTER_AUTH_URL,
     });
 
     req.user = { id: payload.id ?? payload.sub, ...payload };
