@@ -42,22 +42,18 @@ export const createEvents = async (req, res) => {
   }
 };
 
-// GET /events/:id Event details page - public - done
+// GET /events/ Event details page - public - done
 export const getEvents = async (req, res) => {
   try {
-    const data = await EventModel.find({}, { updatedAt: 0, createdAt: 0 });
-    if (data === null) {
-      return res.status(200).json({
-        status: "Success",
-        message: "There is no data to show.",
-      });
-    }
+    const data = await EventModel.find({}, { updatedAt: 0, createdAt: 0 }).lean();
 
     return res.status(200).json({
       status: "Success",
-      data: data,
+      message: data.length === 0 ? "There is no data to show." : undefined,
+      data, // always an array, empty if nothing found
     });
-  } catch {
+  } catch (error) {
+    console.error("getEvents error:", error);
     return res.status(500).json({
       status: "Fail",
       message: "Something went wrong, try again",
