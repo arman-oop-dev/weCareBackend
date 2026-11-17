@@ -1,7 +1,9 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
 // Create once, not per request, so the keys are cached
-const JWKS = createRemoteJWKSet(new URL("http://localhost:3000/api/auth/jwks"));
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.BETTER_AUTH_URL}/api/auth/jwks`),
+);
 
 const authVerify = async (req, res, next) => {
   const authHeader = req.headers.authorization;
